@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Will You Be My Valentine? ❤️</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #ffe6e6 0%, #ffb3ba 50%, #ff9aa2 100%);
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            margin: 0;
+            overflow: hidden;
+        }
+        .container {
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 2px solid white;
+            min-width: 420px;
+            min-height: 350px;
+        }
+        h1 { color: #d63031; font-size: 2.5rem; margin-bottom: 20px; }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            min-height: 250px; 
+            position: relative;
+        }
+        
+        button {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.1s ease;
+        }
+
+        #yesBtn { background-color: #2ecc71; color: white; z-index: 5; }
+        
+        #noBtn {
+            background-color: #e74c3c;
+            color: white;
+            position: absolute;
+            z-index: 10;
+            white-space: nowrap;
+        }
+
+        /* Dialogue bubble */
+        #shinchan-bubble {
+            position: absolute;
+            top: -45px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            border: 2px solid #000;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #000;
+            display: none;
+            white-space: nowrap;
+        }
+
+        /* Shin-chan Sticker */
+        #shinchan-sticker {
+            position: absolute;
+            top: -110px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            display: none;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Will you be my Valentine? ❤️</h1>
+        <div class="btn-container" id="movementFrame">
+            <button id="yesBtn" onclick="alert('Yay! ❤️ I knew you would say yes!')">Yes</button>
+            
+            <button id="noBtn" onmouseover="moveButton()" onclick="moveButton()">
+                <img id="shinchan-sticker" src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbmZueXByZzZ3eHh6NHN6eHh6NHN6eHh6NHN6eHh6NHN6eHh6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1z/3o7TKVUn7iM8FMEU24/giphy.gif" alt="Shinchan">
+                <div id="shinchan-bubble">Kyu nahi pakad pa rahe Pundir? 😜</div>
+                No <span id="smiley">😊</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const reactions = ['😜', '😝', '😂', '😏', '🤪'];
+        let moveCount = 0;
+
+        function moveButton() {
+            const btn = document.getElementById('noBtn');
+            const smiley = document.getElementById('smiley');
+            const bubble = document.getElementById('shinchan-bubble');
+            const sticker = document.getElementById('shinchan-sticker');
+            const frame = document.getElementById('movementFrame');
+
+            moveCount++;
+
+            smiley.innerText = reactions[Math.floor(Math.random() * reactions.length)];
+            
+            // Show Sticker and Dialogue after 2nd try
+            if (moveCount >= 2) {
+                bubble.style.display = 'block';
+                sticker.style.display = 'block';
+            }
+
+            const frameWidth = frame.clientWidth;
+            const frameHeight = frame.clientHeight;
+
+            // Constrain movement so everything (sticker + bubble) stays visible
+            const maxX = frameWidth - btn.offsetWidth;
+            const maxY = frameHeight - btn.offsetHeight - 100; // Extra space for sticker
+
+            const randomX = Math.floor(Math.random() * maxX);
+            const randomY = Math.max(100, Math.floor(Math.random() * maxY)); // Start lower to keep sticker on screen
+
+            btn.style.left = randomX + 'px';
+            btn.style.top = randomY + 'px';
+        }
+    </script>
+</body>
+</html>
