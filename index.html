@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Will You Be My Valentine? ❤️</title>
     <style>
         body {
@@ -15,39 +15,51 @@
             text-align: center;
             margin: 0;
             overflow: hidden;
+            touch-action: manipulation;
         }
         .container {
-            padding: 40px;
+            padding: 20px;
             background: rgba(255, 255, 255, 0.4);
             border-radius: 20px;
             backdrop-filter: blur(10px);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             border: 2px solid white;
-            min-width: 420px;
-            min-height: 350px;
+            /* Adaptive size for mobile and desktop */
+            width: 90%;
+            max-width: 600px;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
         }
-        h1 { color: #d63031; font-size: 2.5rem; margin-bottom: 20px; }
+        h1 { color: #d63031; font-size: 2rem; margin-bottom: 20px; }
         
         .btn-container {
+            flex-grow: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 40px;
-            min-height: 250px; 
             position: relative;
+            width: 100%;
         }
         
         button {
-            padding: 15px 30px;
-            font-size: 1.2rem;
+            padding: 15px 25px;
+            font-size: 1.1rem;
             font-weight: bold;
             border: none;
             border-radius: 12px;
             cursor: pointer;
-            transition: all 0.1s ease;
+            transition: all 0.15s ease;
+            touch-action: none;
         }
 
-        #yesBtn { background-color: #2ecc71; color: white; z-index: 5; }
+        #yesBtn { 
+            background-color: #2ecc71; 
+            color: white; 
+            z-index: 5; 
+            position: relative; 
+        }
         
         #noBtn {
             background-color: #e74c3c;
@@ -55,32 +67,32 @@
             position: absolute;
             z-index: 10;
             white-space: nowrap;
+            /* Initial side-by-side placement */
+            left: 60%;
         }
 
-        /* Dialogue bubble */
         #shinchan-bubble {
             position: absolute;
-            top: -45px;
+            top: -40px;
             left: 50%;
             transform: translateX(-50%);
             background: #fff;
             border: 2px solid #000;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 0.85rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
             font-weight: bold;
             color: #000;
             display: none;
             white-space: nowrap;
         }
 
-        /* Shin-chan Sticker */
         #shinchan-sticker {
             position: absolute;
-            top: -110px;
+            top: -95px;
             left: 50%;
             transform: translateX(-50%);
-            width: 80px;
+            width: 70px;
             display: none;
             pointer-events: none;
         }
@@ -93,9 +105,9 @@
         <div class="btn-container" id="movementFrame">
             <button id="yesBtn" onclick="alert('Yay! ❤️ I knew you would say yes!')">Yes</button>
             
-            <button id="noBtn" onmouseover="moveButton()" onclick="moveButton()">
+            <button id="noBtn" onmouseover="moveButton()" ontouchstart="moveButton()">
                 <img id="shinchan-sticker" src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbmZueXByZzZ3eHh6NHN6eHh6NHN6eHh6NHN6eHh6NHN6eHh6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1z/3o7TKVUn7iM8FMEU24/giphy.gif" alt="Shinchan">
-                <div id="shinchan-bubble">Kyu nahi pakad pa rahe Pundir? 😜</div>
+                <div id="shinchan-bubble">Kyu nahi pakad pa rahe? 😜</div>
                 No <span id="smiley">😊</span>
             </button>
         </div>
@@ -106,34 +118,56 @@
         let moveCount = 0;
 
         function moveButton() {
-            const btn = document.getElementById('noBtn');
+            const noBtn = document.getElementById('noBtn');
+            const yesBtn = document.getElementById('yesBtn');
             const smiley = document.getElementById('smiley');
             const bubble = document.getElementById('shinchan-bubble');
             const sticker = document.getElementById('shinchan-sticker');
             const frame = document.getElementById('movementFrame');
 
             moveCount++;
-
             smiley.innerText = reactions[Math.floor(Math.random() * reactions.length)];
             
-            // Show Sticker and Dialogue after 2nd try
             if (moveCount >= 2) {
                 bubble.style.display = 'block';
                 sticker.style.display = 'block';
             }
 
-            const frameWidth = frame.clientWidth;
-            const frameHeight = frame.clientHeight;
+            const frameRect = frame.getBoundingClientRect();
+            const yesRect = yesBtn.getBoundingClientRect();
 
-            // Constrain movement so everything (sticker + bubble) stays visible
-            const maxX = frameWidth - btn.offsetWidth;
-            const maxY = frameHeight - btn.offsetHeight - 100; // Extra space for sticker
+            // Calculate the Yes button boundaries relative to the frame
+            const forbidden = {
+                left: yesRect.left - frameRect.left - 50,
+                right: yesRect.right - frameRect.left + 50,
+                top: yesRect.top - frameRect.top - 100, // Extra space for Shinchan
+                bottom: yesRect.bottom - frameRect.top + 50
+            };
 
-            const randomX = Math.floor(Math.random() * maxX);
-            const randomY = Math.max(100, Math.floor(Math.random() * maxY)); // Start lower to keep sticker on screen
+            let randomX, randomY;
+            let isOverlapping = true;
+            let attempts = 0;
 
-            btn.style.left = randomX + 'px';
-            btn.style.top = randomY + 'px';
+            while (isOverlapping && attempts < 50) {
+                // Keep button inside container bounds
+                const maxX = frame.clientWidth - noBtn.offsetWidth;
+                const maxY = frame.clientHeight - noBtn.offsetHeight;
+
+                randomX = Math.random() * maxX;
+                randomY = Math.random() * (maxY - 100) + 100; // Leave space for sticker
+
+                // Check if the new X and Y fall inside the forbidden 'Yes' zone
+                const insideX = randomX > forbidden.left && randomX < forbidden.right;
+                const insideY = randomY > forbidden.top && randomY < forbidden.bottom;
+
+                if (!(insideX && insideY)) {
+                    isOverlapping = false;
+                }
+                attempts++;
+            }
+
+            noBtn.style.left = randomX + 'px';
+            noBtn.style.top = randomY + 'px';
         }
     </script>
 </body>
